@@ -197,7 +197,7 @@ int chkSetMask(BITMAPINFO * bmi)
 
 	if (bmi->bVClrUsed) { std::cout << "File contain color table. This type of file is unsupported!"; return 0; }
 
-	if ((*bmi).bVRedMask == 0 || (*bmi).bVGreenMask == 0 || (*bmi).bVBlueMask == 0 ) {
+	if (bmi->bVCompression == 0 || (*bmi).bVRedMask == 0 || (*bmi).bVGreenMask == 0 || (*bmi).bVBlueMask == 0 ) {
 		WORD numberOfColors = (*bmi).bVBitCount >> 3;
 		if (numberOfColors < 3) { numberOfColors = 3; }
 		WORD bitsOnColor = (*bmi).bVBitCount / numberOfColors; //какая-то муть, должно быть проще, 5 или 8
@@ -206,10 +206,11 @@ int chkSetMask(BITMAPINFO * bmi)
 		(*bmi).bVBlueMask = maskvalue;
 		(*bmi).bVGreenMask = maskvalue << bitsOnColor;
 		(*bmi).bVRedMask = maskvalue << (bitsOnColor * 2);
+		bmi->bVAlphaMask = maskvalue << (bitsOnColor * 3);
 	}
 	std::cout << "\nMask value:\n" << std::hex; 
 	std::cout << "B:" << bmi->bVBlueMask << std::endl;
-	std::cout<<"G:"<<bmi->bVGreenMask << std::endl;
+	std::cout << "G:" << bmi->bVGreenMask << std::endl;
 	std::cout << "R:" << bmi->bVRedMask << std::endl;
 	std::cout << "A:" << bmi->bVAlphaMask << std::endl;
 	return 1;
@@ -312,15 +313,15 @@ void loadImageBuf(FILE * fb, BITMAPFILEHEADER* bmfh, BITMAPINFO * bmi, RGBQUAD *
 void printHexPixel(BITMAPINFO* bmi, RGBQUAD ** pixelRGB)
 {
 	std::cout << "\n\n\t Image pixels value in HEX:\n\n";
-	for (LONG i = 0; i < 5; i++)//(bmi->bVHeight)
+	for (LONG i = 0; i < bmi->bVHeight; i++)//(bmi->bVHeight)
 	{
-		for (LONG j = 0; j < 5; j++)//(bmi->bVWidth)
+		for (LONG j = 0; j < bmi->bVWidth; j++)//(bmi->bVWidth)
 		{
 			std::cout << std::hex
 				<< "R::" << +pixelRGB[i][j].rgbRed << ", "
 				<< "G::" << +pixelRGB[i][j].rgbGreen << ", "
 				<< "B::" << +pixelRGB[i][j].rgbBlue << ", "
-				<< "A::" << +pixelRGB[i][j].rgbReserved << ";\t";
+				<< "A::" << +pixelRGB[i][j].rgbReserved << "; \t";
 		}
 		std::cout << std::endl;
 	}
